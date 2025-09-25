@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\GetOrganisationByNameRequest;
 use App\Models\Activity;
 use App\Models\Building;
 use App\Models\Organisation;
+use DB;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Ramsey\Uuid\Type\Integer;
@@ -169,6 +169,76 @@ class OrganisationController extends Controller
         $buildingsId = $buildings->pluck('id');
 
         $organisations = Organisation::whereIn('building_id', $buildingsId)->with('building', 'activities')->get();
+
+        return response()->json($organisations);
+    }
+
+    /**
+     * @OA\Get(
+     * path="/api/organisations/area/radius",
+     * operationId="getOrganisationsInRadius",
+     * tags={"Organisations"},
+     * summary="Get organisations within a radius geographic area",
+     * description="Returns a list of organisations whose buildings are within the specified radius from estimated dot.",
+     * @OA\Parameter(
+     * name="center_lat",
+     * description="latitude of center",
+     * required=true,
+     * in="query",
+     * @OA\Schema(type="number", format="float")
+     * ),
+     * @OA\Parameter(
+     * name="center_lng",
+     * description="longitude of center",
+     * required=true,
+     * in="query",
+     * @OA\Schema(type="number", format="float")
+     * ),
+     * @OA\Parameter(
+     * name="radius",
+     * description="radius of search",
+     * required=true,
+     * in="query",
+     * @OA\Schema(type="number", format="float")
+     * ),
+     * @OA\Response(
+     * response=200,
+     * description="Successful operation",
+     * @OA\JsonContent(
+     * type="array",
+     * @OA\Items(ref="#/components/schemas/FullOrganisation")
+     * )
+     * )
+     * )
+     */
+    public function getOrganisationsInRadius(Request $request)
+    {
+        $request->validate([
+            'center_lat' => 'required|numeric',
+            'center_lng' => 'required|numeric',
+            'radius' => 'required|numeric|min:0',
+        ]);
+
+        $centerLat = $request->input('center_lat');
+        $centerLng = $request->input('center_lng');
+        $radius = $request->input('radius');
+
+        $earthRadius = 6371;
+
+        $organisations = Organisation::select('organisations.*', DB::raw("
+            ($earthRadius * acos(
+                cos(radians($centerLat))
+                * cos(radians(buildings.latitude))
+                * cos(radians(buildings.longitude) - radians($centerLng))
+                + sin(radians($centerLat))
+                * sin(radians(buildings.latitude))
+            )) AS distance"
+        ))
+        ->join('buildings', 'organisations.building_id', '=', 'buildings.id')
+        ->having('distance', '<=', $radius)
+        ->with('building', 'activities')
+        ->orderBy('distance')
+        ->get();
 
         return response()->json($organisations);
     }

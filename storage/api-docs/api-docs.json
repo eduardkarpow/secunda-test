@@ -1,0 +1,481 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Building Management API",
+        "description": "API documentation for the Organisations resource.",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/activities": {
+            "post": {
+                "tags": [
+                    "Activities"
+                ],
+                "summary": "Create a new activity",
+                "description": "Creates a new activity. The depth cannot exceed 3.",
+                "operationId": "storeActivity",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "parent_id"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Fish"
+                                    },
+                                    "parent_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Activity created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Activity"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Depth cannot be more than 3"
+                    }
+                }
+            }
+        },
+        "/api/organisations": {},
+        "/api/activities/{activity}/organisations": {
+            "get": {
+                "tags": [
+                    "Activities"
+                ],
+                "summary": "Get organisations by activity",
+                "description": "Retrieves a list of organisations associated with a specific activity.",
+                "operationId": "getOrganisationsByActivity",
+                "parameters": [
+                    {
+                        "name": "activity",
+                        "in": "path",
+                        "description": "ID of the activity",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Organisation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/building/{building}/organisations": {
+            "get": {
+                "tags": [
+                    "Organisations"
+                ],
+                "summary": "Get all organisations within a specific building",
+                "description": "Retrieves a list of organisations located in a given building.",
+                "operationId": "getOrganisationsInBuilding",
+                "parameters": [
+                    {
+                        "name": "building",
+                        "in": "path",
+                        "description": "ID of the building",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Organisation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Building not found"
+                    }
+                }
+            }
+        },
+        "/api/organisations/{organisation}": {
+            "get": {
+                "tags": [
+                    "Organisations"
+                ],
+                "summary": "Get a single organisation",
+                "description": "Returns a single organisation with its associated building and activities.",
+                "operationId": "showOrganisation",
+                "parameters": [
+                    {
+                        "name": "organisation",
+                        "in": "path",
+                        "description": "ID of the organisation",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/FullOrganisation"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/organisations/search": {
+            "get": {
+                "tags": [
+                    "Organisations"
+                ],
+                "summary": "Search for organisations by name",
+                "description": "Returns a list of organisations that match the given name query.",
+                "operationId": "searchOrganisations",
+                "parameters": [
+                    {
+                        "name": "name",
+                        "in": "query",
+                        "description": "Search query for organisation name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Organisation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/organisations/area/rect": {
+            "get": {
+                "tags": [
+                    "Organisations"
+                ],
+                "summary": "Get organisations within a rectangular geographic area",
+                "description": "Returns a list of organisations whose buildings are within the specified latitude and longitude bounds.",
+                "operationId": "getOrganisationsInRectArea",
+                "parameters": [
+                    {
+                        "name": "min_lat",
+                        "in": "query",
+                        "description": "Minimum latitude of the search area",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "max_lat",
+                        "in": "query",
+                        "description": "Maximum latitude of the search area",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "min_lng",
+                        "in": "query",
+                        "description": "Minimum longitude of the search area",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    },
+                    {
+                        "name": "max_lng",
+                        "in": "query",
+                        "description": "Maximum longitude of the search area",
+                        "required": true,
+                        "schema": {
+                            "type": "number",
+                            "format": "float"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/FullOrganisation"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/organisations/search/by/activity": {
+            "get": {
+                "tags": [
+                    "Organisations"
+                ],
+                "summary": "Get organisations by activity type",
+                "description": "Retrieves a list of organisations that are associated with a specific activity and its child activities types",
+                "operationId": "getOrganisationsByActivityTypes",
+                "parameters": [
+                    {
+                        "name": "activity_type",
+                        "in": "query",
+                        "description": "Name of the activity type to search for",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/FullOrganisation"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Invalid activity type"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Activity": {
+                "title": "Activity",
+                "description": "An Activity object representing a hierarchical organisation activity types.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Food"
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "example": null,
+                        "nullable": true
+                    },
+                    "depth": {
+                        "type": "integer",
+                        "example": 0
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2023-01-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Building": {
+                "title": "Building",
+                "description": "A Building object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 1
+                    },
+                    "address": {
+                        "type": "string",
+                        "example": "123 Main St"
+                    },
+                    "longitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": "-74.0059"
+                    },
+                    "lattitude": {
+                        "type": "number",
+                        "format": "float",
+                        "example": "40.7128"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2023-01-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Organisation": {
+                "title": "Organisation",
+                "description": "An Organisation object representing a company or group.",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "example": 101
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Innovate Inc."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "555-123-4567"
+                    },
+                    "building_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2023-01-01T12:00:00Z"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "example": "2023-01-01T12:00:00Z"
+                    }
+                },
+                "type": "object"
+            },
+            "FullOrganisation": {
+                "title": "Full Organisation with relations",
+                "description": "An Organisation object including its related building and activities.",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Organisation"
+                    },
+                    {
+                        "properties": {
+                            "building": {
+                                "$ref": "#/components/schemas/Building"
+                            },
+                            "activities": {
+                                "type": "array",
+                                "items": {
+                                    "allOf": [
+                                        {
+                                            "$ref": "#/components/schemas/Activity"
+                                        },
+                                        {
+                                            "properties": {
+                                                "pivot": {
+                                                    "properties": {
+                                                        "organisation_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "activity_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Activities",
+            "description": "Activities"
+        },
+        {
+            "name": "Organisations",
+            "description": "Organisations"
+        }
+    ]
+}

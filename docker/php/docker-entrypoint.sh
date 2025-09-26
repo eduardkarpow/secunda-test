@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sleep 15
 
 echo "Running Laravel migrations..."

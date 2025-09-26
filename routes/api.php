@@ -11,3 +11,4 @@ Route::apiResource('activities', ActivityController::class);
 Route::get('/organisations/search/by/activity', [OrganisationController::class, 'getOrganisationsByActivityTypes']);
 Route::get('/activities/{activity}/organisations', [ActivityController::class, 'getOrganisationsByActivity']);
 Route::get('/organisations/area/rect', [OrganisationController::class, 'getOrganisationsInRectArea']);
+Route::get('/organisations/area/radius', [OrganisationController::class, 'getOrganisationsInRadius']);

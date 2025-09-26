@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: ./docker/php
-    container_name: PROfashion
+    container_name: secunda
     volumes:
       - ./:/var/www
     networks:
